@@ -201,14 +201,9 @@ public bool isActive;
 - `Debug.Log` は開発用途のみ。リリース前に除去または `#if UNITY_EDITOR` で囲む
 - エラーは `Debug.LogError` で報告し、例外はできる限り上位に伝播させる
 - `null` チェックは `is null` / `is not null` 演算子を使用する（`== null` 非推奨）
-
 ---
 
 ## 11. ブランチ戦略
 
 - **新機能・修正ブランチ** のプルリクエスト先は必ず `develop` にする
 - `main` へのプルリクエストは `develop` からのみ行う（直接マージ禁止）
-
-```
-feature/* → develop → main
-```
