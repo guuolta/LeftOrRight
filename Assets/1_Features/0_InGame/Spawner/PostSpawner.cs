@@ -25,6 +25,9 @@ namespace InGame.Spawner
         [Header("吹き出しエリアの親オブジェクト（生成した投稿ネタの親にする）")]
         [SerializeField] private Transform _thoughtBubbleParent;
 
+        [Header("吹き出しエリアのView（キャパシティ表示更新用）")]
+        [SerializeField] private ThoughtBubble.ThoughtBubbleView _thoughtBubbleView;
+
         private PostInputHandler _inputHandler;
         private GameModel _gameModel;
 
@@ -119,7 +122,11 @@ namespace InGame.Spawner
                     count++;
                 }
             }
+
             _activeItemCount = count;
+
+            // 吹き出しViewのキャパシティ表示を更新
+            _thoughtBubbleView?.UpdateCapacity(_activeItemCount, _config.MaxCapacity);
         }
     }
 }

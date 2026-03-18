@@ -127,20 +127,23 @@ namespace InGame.GameFlow
             StartGame();
         }
 
+        [Header("吹き出しエリアの親Transform（リトライ時のクリア用）")]
+        [SerializeField] private Transform _thoughtBubbleParent;
+
         /// <summary>
         /// フィールド上の全投稿ネタを削除する。
         /// </summary>
         private void ClearAllItems()
         {
-            var thoughtBubble = _postSpawner.GetComponent<Transform>().Find("ThoughtBubble");
-            if (thoughtBubble is null)
+            if (_thoughtBubbleParent is null)
             {
                 return;
             }
 
-            foreach (Transform child in thoughtBubble)
+            // 子オブジェクトを逆順に破棄（コレクション変更を安全に処理）
+            for (var i = _thoughtBubbleParent.childCount - 1; i >= 0; i--)
             {
-                Destroy(child.gameObject);
+                Destroy(_thoughtBubbleParent.GetChild(i).gameObject);
             }
         }
 
