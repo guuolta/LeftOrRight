@@ -2,6 +2,7 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 using TMPro;
+using UnityEngine.TextCore.LowLevel;
 
 namespace Common.Editor
 {
@@ -12,11 +13,44 @@ namespace Common.Editor
     {
         // ========== フォント ==========
 
+        [MenuItem("Tools/InGame Setup/Set TMP Default Font")]
+        public static void SetTMPDefaultFont()
+        {
+            const string fontAssetPath = "Assets/0_Common/Fonts/HiraginoSans-W4 SDF.asset";
+            var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontAssetPath);
+            if (fontAsset == null)
+            {
+                Debug.LogError($"[AssetGeneratorHelper] フォントアセットが見つかりません: {fontAssetPath}");
+                return;
+            }
+
+            // TMP Settings のデフォルトフォントを設定
+            var settings = TMP_Settings.instance;
+            if (settings == null)
+            {
+                Debug.LogError("[AssetGeneratorHelper] TMP_Settings が見つかりません");
+                return;
+            }
+
+            var so = new SerializedObject(settings);
+            so.FindProperty("m_defaultFontAsset").objectReferenceValue = fontAsset;
+            so.ApplyModifiedProperties();
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[AssetGeneratorHelper] TMP デフォルトフォントを設定しました: {fontAssetPath}");
+        }
+
         [MenuItem("Tools/InGame Setup/Create Japanese Font Asset")]
         public static void CreateJapaneseFontAsset()
         {
-            const string fontPath    = "Assets/0_Common/Fonts/HiraginoSans-W4.ttc";
-            const string assetPath   = "Assets/0_Common/Fonts/HiraginoSans-W4 SDF.asset";
+            const string fontPath  = "Assets/0_Common/Fonts/HiraginoSans-W4.ttc";
+            const string assetPath = "Assets/0_Common/Fonts/HiraginoSans-W4 SDF.asset";
+
+            // 既存アセットを削除して再作成
+            if (AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath) != null)
+            {
+                AssetDatabase.DeleteAsset(assetPath);
+                AssetDatabase.Refresh();
+            }
 
             var font = AssetDatabase.LoadAssetAtPath<Font>(fontPath);
             if (font == null)
@@ -25,26 +59,101 @@ namespace Common.Editor
                 return;
             }
 
-            // 既存チェック
+            // フォントを選択状態にしてUnity組み込みのSDF作成メニューを実行
+            // → 同フォルダに "HiraginoSans-W4 SDF.asset" が生成される
+            Selection.activeObject = font;
+            EditorApplication.ExecuteMenuItem("Assets/Create/TextMeshPro/Font Asset/SDF");
+
+            Debug.Log($"[AssetGeneratorHelper] フォントアセット作成メニューを実行しました。{assetPath} を確認してください。");
+        }
+
+        [MenuItem("Tools/InGame Setup/Create Japanese Font Asset (OLD)")]
+        private static void CreateJapaneseFontAssetOld()
+        {
+            const string fontPath  = "Assets/0_Common/Fonts/HiraginoSans-W4.ttc";
+            const string assetPath = "Assets/0_Common/Fonts/HiraginoSans-W4 SDF.asset";
+            const string assetName = "HiraginoSans-W4 SDF";
+
+            var font = AssetDatabase.LoadAssetAtPath<Font>(fontPath);
+            if (font == null)
+            {
+                Debug.LogError($"[AssetGeneratorHelper] フォントが見つかりません: {fontPath}");
+                return;
+            }
+
+            // 既存アセットを削除して再作成
             if (AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath) != null)
             {
-                Debug.Log("[AssetGeneratorHelper] フォントアセットは既に存在します");
-                return;
+                AssetDatabase.DeleteAsset(assetPath);
             }
 
-            // Dynamic SDF フォントアセットを作成（文字は実行時にロード）
-            var fontAsset = TMP_FontAsset.CreateFontAsset(font);
-
-            if (fontAsset == null)
+            // FontEngineで初期化
+            FontEngine.InitializeFontEngine();
+            if (FontEngine.LoadFontFace(font, 90) != FontEngineError.Success)
             {
-                Debug.LogError("[AssetGeneratorHelper] フォントアセットの作成に失敗しました");
+                Debug.LogError($"[AssetGeneratorHelper] フォントフェースの読み込みに失敗: {fontPath}");
                 return;
             }
 
+            // FontAssetを生成してアセットとして保存
+            var fontAsset = ScriptableObject.CreateInstance<TMP_FontAsset>();
             AssetDatabase.CreateAsset(fontAsset, assetPath);
+
+            // SerializedObjectで内部フィールドを設定
+            var so = new SerializedObject(fontAsset);
+            so.FindProperty("m_Version").stringValue                    = "1.1.0";
+            so.FindProperty("m_SourceFontFileGUID").stringValue         = AssetDatabase.AssetPathToGUID(fontPath);
+            so.FindProperty("m_SourceFontFile_EditorRef").objectReferenceValue = font;
+            so.FindProperty("m_AtlasPopulationMode").intValue           = (int)AtlasPopulationMode.Dynamic;
+            so.FindProperty("m_AtlasWidth").intValue                    = 1024;
+            so.FindProperty("m_AtlasHeight").intValue                   = 1024;
+            so.FindProperty("m_AtlasPadding").intValue                  = 9;
+            so.FindProperty("m_AtlasRenderMode").intValue               = (int)GlyphRenderMode.SDFAA;
+
+            // FaceInfo設定
+            var fi = FontEngine.GetFaceInfo();
+            var fip = so.FindProperty("m_FaceInfo");
+            fip.FindPropertyRelative("m_FamilyName").stringValue = fi.familyName;
+            fip.FindPropertyRelative("m_StyleName").stringValue  = fi.styleName;
+            fip.FindPropertyRelative("m_PointSize").intValue     = (int)fi.pointSize;
+            fip.FindPropertyRelative("m_Scale").floatValue       = fi.scale;
+            fip.FindPropertyRelative("m_LineHeight").floatValue  = fi.lineHeight;
+            fip.FindPropertyRelative("m_AscentLine").floatValue  = fi.ascentLine;
+            fip.FindPropertyRelative("m_DescentLine").floatValue = fi.descentLine;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            // アトラステクスチャをサブアセットとして追加
+            var texture = new Texture2D(1, 1, TextureFormat.Alpha8, false) { name = assetName + " Atlas" };
+            AssetDatabase.AddObjectToAsset(texture, fontAsset);
+            var atlasArr = so.FindProperty("m_AtlasTextures");
+            atlasArr.arraySize = 1;
+            atlasArr.GetArrayElementAtIndex(0).objectReferenceValue = texture;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            // マテリアルをサブアセットとして追加
+            var shader = Shader.Find("TextMeshPro/Distance Field");
+            var mat = new Material(shader) { name = assetName + " Atlas Material" };
+            mat.SetFloat(ShaderUtilities.ID_GradientScale, 10f);
+            mat.SetTexture(ShaderUtilities.ID_MainTex, texture);
+            mat.SetFloat(ShaderUtilities.ID_TextureWidth, 1024f);
+            mat.SetFloat(ShaderUtilities.ID_TextureHeight, 1024f);
+            AssetDatabase.AddObjectToAsset(mat, fontAsset);
+            so.FindProperty("m_Material").objectReferenceValue = mat;
+
+            // freeGlyphRects 初期化
+            var freeRects = so.FindProperty("m_FreeGlyphRects");
+            freeRects.arraySize = 1;
+            var r = freeRects.GetArrayElementAtIndex(0);
+            r.FindPropertyRelative("x").intValue      = 0;
+            r.FindPropertyRelative("y").intValue      = 0;
+            r.FindPropertyRelative("width").intValue  = 1023;
+            r.FindPropertyRelative("height").intValue = 1023;
+            so.FindProperty("m_UsedGlyphRects").arraySize = 0;
+            so.ApplyModifiedProperties();
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[AssetGeneratorHelper] フォントアセット作成完了: {assetPath}");
+            Debug.Log($"[AssetGeneratorHelper] フォントアセット作成完了（Texture・Material付き）: {assetPath}");
         }
 
         // ========== スプライト ==========
