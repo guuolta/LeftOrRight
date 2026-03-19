@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 using InGame.Spawner;
 using InGame.Post;
 using InGame.Input;
@@ -160,6 +161,82 @@ namespace Common.Editor
             // シーン保存
             UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
             Debug.Log("[SceneSetupHelper] シーン参照配線完了・保存しました");
+        }
+
+        [MenuItem("Tools/InGame Setup/Apply Fonts and Sprites")]
+        public static void ApplyFontsAndSprites()
+        {
+            var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/0_Common/Fonts/HiraginoSans-W4 SDF.asset");
+            var roundedRect = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/RoundedRect.png");
+            var ellipse     = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Ellipse.png");
+            var circle      = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Circle.png");
+            var phoneFrame  = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/PhoneFrame.png");
+
+            if (fontAsset == null) { Debug.LogError("[SceneSetupHelper] フォントアセットが見つかりません"); return; }
+
+            var canvasGo        = GameObject.Find("Canvas");
+            var headerGo        = canvasGo?.transform.Find("[UI] Header");
+            var thoughtBubbleGo = canvasGo?.transform.Find("[UI] ThoughtBubble");
+            var publicPhoneGo   = canvasGo?.transform.Find("[UI] PublicPhone");
+            var privatePhoneGo  = canvasGo?.transform.Find("[UI] PrivatePhone");
+            var gameOverPanelGo = canvasGo?.transform.Find("[UI] GameOverPanel");
+            var titlePanelGo    = canvasGo?.transform.Find("[UI] TitlePanel");
+
+            var tmpType = Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+
+            // --- 全TextMeshProUGUIにフォントを適用 ---
+            void ApplyFont(Transform parent, string childName)
+            {
+                var go = parent?.Find(childName);
+                if (go == null) return;
+                var tmp = go.GetComponent(tmpType) as TMP_Text;
+                if (tmp == null) return;
+                var so = new SerializedObject(tmp);
+                so.FindProperty("m_fontAsset").objectReferenceValue = fontAsset;
+                so.ApplyModifiedProperties();
+            }
+
+            ApplyFont(headerGo,                                           "ScoreText");
+            ApplyFont(gameOverPanelGo,                                    "ReasonText");
+            ApplyFont(gameOverPanelGo,                                    "FinalScoreText");
+            ApplyFont(titlePanelGo,                                       "TitleText");
+            ApplyFont(titlePanelGo?.Find("InstructionCanvasGroup"),       "InstructionText");
+
+            // --- ThoughtBubble 背景Image にEllipseスプライトを設定 ---
+            SetSprite(thoughtBubbleGo?.Find("Image"), ellipse, new Color(0.9f, 0.95f, 1f));
+
+            // --- PublicPhone ---
+            SetSprite(publicPhoneGo?.Find("Image"),          phoneFrame, new Color(0.68f, 0.85f, 0.90f)); // パステルブルー
+            SetSprite(publicPhoneGo?.Find("HighlightImage"), roundedRect, new Color(1f, 1f, 0f, 0.3f));
+
+            // --- PrivatePhone ---
+            SetSprite(privatePhoneGo?.Find("Image"),          phoneFrame, new Color(0.18f, 0.1f, 0.22f)); // ダークパープル
+            SetSprite(privatePhoneGo?.Find("HighlightImage"), roundedRect, new Color(1f, 1f, 0f, 0.3f));
+
+            // --- PostItem Prefab に Circle スプライトを設定 ---
+            var prefabPath = "Assets/1_Features/0_InGame/Post/Prefabs/PostItem.prefab";
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab != null)
+            {
+                using var editScope = new PrefabUtility.EditPrefabContentsScope(prefabPath);
+                var root = editScope.prefabContentsRoot;
+                SetSprite(root.transform.Find("Background"), circle, Color.white);
+            }
+
+            UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
+            AssetDatabase.SaveAssets();
+            Debug.Log("[SceneSetupHelper] フォント・スプライト適用完了");
+        }
+
+        private static void SetSprite(Transform t, Sprite sprite, Color color)
+        {
+            if (t == null || sprite == null) return;
+            var img = t.GetComponent<Image>();
+            if (img == null) return;
+            var so = new SerializedObject(img);
+            so.FindProperty("m_Sprite").objectReferenceValue = sprite;
+            so.FindProperty("m_Color").colorValue = color;
+            so.ApplyModifiedProperties();
         }
 
         private static void WireSpawnerPostConfigs()
