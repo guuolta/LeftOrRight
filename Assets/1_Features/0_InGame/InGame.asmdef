@@ -1,0 +1,28 @@
+{
+    "name": "InGame",
+    "rootNamespace": "InGame",
+    "references": [
+        "Unity.TextMeshPro",
+        "UniTask",
+        "UniTask.DOTween",
+        "R3.Unity",
+        "DOTween.Modules",
+        "VContainer",
+        "Unity.InputSystem",
+        "ZString"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "DOTween.dll",
+        "R3.dll",
+        "ObservableCollections.dll",
+        "ObservableCollections.R3.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
