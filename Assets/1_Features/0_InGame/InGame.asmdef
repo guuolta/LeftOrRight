@@ -5,7 +5,6 @@
         "Unity.TextMeshPro",
         "UniTask",
         "R3.Unity",
-        "DOTween.Modules",
         "VContainer",
         "Unity.InputSystem",
         "ZString"
