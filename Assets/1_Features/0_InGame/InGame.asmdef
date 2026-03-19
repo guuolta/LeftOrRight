@@ -4,7 +4,9 @@
     "references": [
         "Unity.TextMeshPro",
         "UniTask",
+        "UniTask.DOTween",
         "R3.Unity",
+        "DOTween.Modules",
         "VContainer",
         "Unity.InputSystem",
         "ZString"
