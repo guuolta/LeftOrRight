@@ -166,7 +166,7 @@ namespace Common.Editor
         [MenuItem("Tools/InGame Setup/Apply Fonts and Sprites")]
         public static void ApplyFontsAndSprites()
         {
-            var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/0_Common/Fonts/HiraginoSans-W4 SDF.asset");
+            var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/0_Common/Fonts/Zen_Kaku_Gothic_Antique/ZenKakuGothicAntique-Medium SDF.asset");
             var roundedRect = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/RoundedRect.png");
             var ellipse     = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Ellipse.png");
             var circle      = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Circle.png");
