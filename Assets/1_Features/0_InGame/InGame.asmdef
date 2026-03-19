@@ -2,7 +2,6 @@
     "name": "InGame",
     "rootNamespace": "InGame",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "Unity.TextMeshPro",
         "UniTask",
         "R3",
@@ -15,8 +14,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [
-        "DOTween.dll",
-        "DOTweenEditor.dll"
+        "DOTween.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
