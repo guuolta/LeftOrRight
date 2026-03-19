@@ -4,7 +4,6 @@
     "references": [
         "Unity.TextMeshPro",
         "UniTask",
-        "R3",
         "R3.Unity",
         "DOTween.Modules",
         "VContainer"
