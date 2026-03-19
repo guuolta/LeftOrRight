@@ -121,13 +121,6 @@ namespace InGame.Input
             }
 
             _draggingItem.UpdateDragPosition(GetMouseWorldPosition());
-
-            // ドラッグオーバー中のエリアをハイライト
-            var mousePos = GetMouseWorldPosition();
-            foreach (var area in _sortAreas)
-            {
-                area.SetHighlight(area.Contains(mousePos));
-            }
         }
 
         /// <summary>
@@ -138,28 +131,39 @@ namespace InGame.Input
         /// <param name="worldPosition">クリック位置のワールド座標</param>
         private void TryBeginDrag(PostType clickType, Vector3 worldPosition)
         {
-            // クリック位置にある投稿ネタを取得
-            var hit = Physics2D.OverlapPoint(worldPosition);
-            if (hit is null)
+            // クリック位置にある投稿ネタを直接バウンズ判定で取得
+            // Physics2D.OverlapPointはWorld Space Canvas上のUIコライダーと相性が悪いため使用しない
+            PostItemView hitItem = null;
+            foreach (var item in _activeItems)
             {
-                return;
+                if (!item.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                var diff = item.transform.position - worldPosition;
+                // PostItemのサイズは265×71、半サイズ（132.5×35.5）で判定
+                if (Mathf.Abs(diff.x) <= 132.5f && Mathf.Abs(diff.y) <= 35.5f)
+                {
+                    hitItem = item;
+                    break;
+                }
             }
 
-            var item = hit.GetComponent<PostItemView>();
-            if (item is null || !item.gameObject.activeSelf)
+            if (hitItem is null)
             {
                 return;
             }
 
             // 誤爆チェック：期待種別と異なる投稿をクリックした場合
-            if (item.PostType != clickType)
+            if (hitItem.PostType != clickType)
             {
                 _onMistake.OnNext(GameOverReason.WrongOperation);
                 return;
             }
 
             _expectedPostType = clickType;
-            _draggingItem = item;
+            _draggingItem = hitItem;
             _draggingItem.BeginDrag();
         }
 
@@ -174,17 +178,12 @@ namespace InGame.Input
                 return;
             }
 
-            // ハイライトをすべてリセット
-            foreach (var area in _sortAreas)
-            {
-                area.SetHighlight(false);
-            }
-
-            // ドロップ先のエリアを判定
+            // ドロップ先のエリアを判定（投稿がエリアに少しでも触れていればOK）
+            var postHalfSize = new Vector2(132.5f, 35.5f); // 265/2, 71/2
             SortAreaView droppedArea = null;
             foreach (var area in _sortAreas)
             {
-                if (area.Contains(worldPosition))
+                if (area.OverlapsPost(_draggingItem.Position, postHalfSize))
                 {
                     droppedArea = area;
                     break;
@@ -195,10 +194,11 @@ namespace InGame.Input
             {
                 if (droppedArea.AcceptedPostType == _draggingItem.PostType)
                 {
-                    // 正しいエリアにドロップ → 仕分け成功
+                    // 正しいエリアにドロップ → スマホにスタック・仕分け成功
+                    var postView = _draggingItem as PostItemView;
                     droppedArea.NotifyDropped(_draggingItem);
-                    _draggingItem.Dispose();
-                    UnregisterItem(_draggingItem as PostItemView);
+                    droppedArea.StackPost(postView);
+                    UnregisterItem(postView);
                     _onSortSuccess.OnNext(Unit.Default);
                 }
                 else

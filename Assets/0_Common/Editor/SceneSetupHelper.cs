@@ -94,31 +94,39 @@ namespace Common.Editor
                 }
             }
 
-            // --- SortAreaView (PublicPhone) ---
+            // --- SortAreaView + PhoneStackView (PublicPhone) ---
             if (publicPhoneGo != null)
             {
+                // PhoneStackView を追加（未アタッチの場合）
+                var publicStack = publicPhoneGo.gameObject.GetComponent<PhoneStackView>()
+                    ?? publicPhoneGo.gameObject.AddComponent<PhoneStackView>();
+
                 var area = publicPhoneGo.gameObject.GetComponent<SortAreaView>();
                 if (area != null)
                 {
                     var so = new SerializedObject(area);
                     so.FindProperty("_acceptedPostType").enumValueIndex = (int)PostType.Public;
-                    so.FindProperty("_rectTransform").objectReferenceValue    = publicPhoneGo.gameObject.GetComponent<RectTransform>();
-                    so.FindProperty("_highlightImage").objectReferenceValue   = publicPhoneGo.Find("HighlightImage")?.GetComponent<Image>();
+                    so.FindProperty("_rectTransform").objectReferenceValue = publicPhoneGo.Find("Image")?.GetComponent<RectTransform>();
+                    so.FindProperty("_phoneStack").objectReferenceValue   = publicStack;
                     so.ApplyModifiedProperties();
                     Debug.Log("[SceneSetupHelper] PublicPhone SortAreaView 参照設定完了");
                 }
             }
 
-            // --- SortAreaView (PrivatePhone) ---
+            // --- SortAreaView + PhoneStackView (PrivatePhone) ---
             if (privatePhoneGo != null)
             {
+                // PhoneStackView を追加（未アタッチの場合）
+                var privateStack = privatePhoneGo.gameObject.GetComponent<PhoneStackView>()
+                    ?? privatePhoneGo.gameObject.AddComponent<PhoneStackView>();
+
                 var area = privatePhoneGo.gameObject.GetComponent<SortAreaView>();
                 if (area != null)
                 {
                     var so = new SerializedObject(area);
                     so.FindProperty("_acceptedPostType").enumValueIndex = (int)PostType.Private;
-                    so.FindProperty("_rectTransform").objectReferenceValue    = privatePhoneGo.gameObject.GetComponent<RectTransform>();
-                    so.FindProperty("_highlightImage").objectReferenceValue   = privatePhoneGo.Find("HighlightImage")?.GetComponent<Image>();
+                    so.FindProperty("_rectTransform").objectReferenceValue = privatePhoneGo.Find("Image")?.GetComponent<RectTransform>();
+                    so.FindProperty("_phoneStack").objectReferenceValue   = privateStack;
                     so.ApplyModifiedProperties();
                     Debug.Log("[SceneSetupHelper] PrivatePhone SortAreaView 参照設定完了");
                 }
@@ -167,10 +175,11 @@ namespace Common.Editor
         public static void ApplyFontsAndSprites()
         {
             var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/0_Common/Fonts/Zen_Kaku_Gothic_Antique/ZenKakuGothicAntique-Medium SDF.asset");
-            var roundedRect = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/RoundedRect.png");
-            var ellipse     = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Ellipse.png");
-            var circle      = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Circle.png");
-            var phoneFrame  = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/PhoneFrame.png");
+            var roundedRect       = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/RoundedRect.png");
+            var ellipse           = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Ellipse.png");
+            var circle            = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/Circle.png");
+            var publicPhoneFrame  = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/PublicPhoneFrame.png");
+            var privatePhoneFrame = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/0_Common/Sprites/PrivatePhoneFrame.png");
 
             if (fontAsset == null) { Debug.LogError("[SceneSetupHelper] フォントアセットが見つかりません"); return; }
 
@@ -206,12 +215,10 @@ namespace Common.Editor
             SetSprite(thoughtBubbleGo?.Find("Image"), ellipse, new Color(0.9f, 0.95f, 1f));
 
             // --- PublicPhone ---
-            SetSprite(publicPhoneGo?.Find("Image"),          phoneFrame, new Color(0.68f, 0.85f, 0.90f)); // パステルブルー
-            SetSprite(publicPhoneGo?.Find("HighlightImage"), roundedRect, new Color(1f, 1f, 0f, 0.3f));
+            SetSprite(publicPhoneGo?.Find("Image"),  publicPhoneFrame,  Color.white);
 
             // --- PrivatePhone ---
-            SetSprite(privatePhoneGo?.Find("Image"),          phoneFrame, new Color(0.18f, 0.1f, 0.22f)); // ダークパープル
-            SetSprite(privatePhoneGo?.Find("HighlightImage"), roundedRect, new Color(1f, 1f, 0f, 0.3f));
+            SetSprite(privatePhoneGo?.Find("Image"), privatePhoneFrame, Color.white);
 
             // --- PostItem Prefab に Circle スプライトを設定 ---
             var prefabPath = "Assets/1_Features/0_InGame/Post/Prefabs/PostItem.prefab";
@@ -282,19 +289,13 @@ namespace Common.Editor
             SetPos(publicPhoneGo, new Vector3(-700, 220, 0));
             SetRect(publicPhoneGo?.Find("Image"),
                     anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
-            SetRect(publicPhoneGo?.Find("HighlightImage"),
-                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(300, 420));
 
             // ─── PrivatePhone（右上） ────────────────────────────
             SetPos(privatePhoneGo, new Vector3(700, 220, 0));
             SetRect(privatePhoneGo?.Find("Image"),
                     anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
-            SetRect(privatePhoneGo?.Find("HighlightImage"),
-                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(300, 420));
 
             // ─── ThoughtBubble（中央エリア） ─────────────────────
             SetPos(thoughtBubbleGo, new Vector3(0, -80, 0));
@@ -377,30 +378,36 @@ namespace Common.Editor
 
             // ルートGameObject作成
             var root = new GameObject("PostItem");
-            root.AddComponent<RectTransform>();
+            var rootRt = root.AddComponent<RectTransform>();
+            rootRt.sizeDelta = new Vector2(265f, 71f);
             var postItemView = root.AddComponent<PostItemView>();
             var rb = root.AddComponent<Rigidbody2D>();
-            rb.gravityScale = 1.0f;
+            rb.gravityScale = 0f;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            var col = root.AddComponent<CircleCollider2D>();
-            col.radius = 0.5f;
+            var col = root.AddComponent<BoxCollider2D>();
+            col.size = new Vector2(265f, 71f);
 
             // Background (Image)
             var bgGo = new GameObject("Background");
             bgGo.transform.SetParent(root.transform, false);
-            bgGo.AddComponent<RectTransform>();
+            var bgRt = bgGo.AddComponent<RectTransform>();
+            bgRt.sizeDelta = new Vector2(265f, 71f);
             var bgImage = bgGo.AddComponent<Image>();
 
             // Icon (Image)
             var iconGo = new GameObject("Icon");
             iconGo.transform.SetParent(root.transform, false);
-            iconGo.AddComponent<RectTransform>();
+            var iconRt = iconGo.AddComponent<RectTransform>();
+            iconRt.sizeDelta = new Vector2(53f, 53f);
+            iconRt.anchoredPosition = new Vector2(-97f, 0f);
             var iconImage = iconGo.AddComponent<Image>();
 
             // Label (TextMeshProUGUI) - リフレクションで参照
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(root.transform, false);
-            labelGo.AddComponent<RectTransform>();
+            var labelRt = labelGo.AddComponent<RectTransform>();
+            labelRt.sizeDelta = new Vector2(168f, 53f);
+            labelRt.anchoredPosition = new Vector2(35f, 0f);
             var tmpType = Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
             Component labelComp = null;
             if (tmpType != null)
@@ -417,7 +424,6 @@ namespace Common.Editor
                 so.FindProperty("_labelText").objectReferenceValue = labelComp;
             }
             so.FindProperty("_rigidbody2D").objectReferenceValue = rb;
-            so.FindProperty("_collider2D").objectReferenceValue = col;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             // Prefabとして保存
@@ -450,9 +456,10 @@ namespace Common.Editor
 
             var so = ScriptableObject.CreateInstance<SpawnerConfigSO>();
             var serialized = new SerializedObject(so);
-            serialized.FindProperty("_initialInterval").floatValue = 2.0f;
-            serialized.FindProperty("_minInterval").floatValue = 0.3f;
-            serialized.FindProperty("_intervalDecreasePerSec").floatValue = 0.02f;
+            serialized.FindProperty("_spawnInterval").floatValue = 2.0f;
+            serialized.FindProperty("_initialSpawnCount").intValue = 1;
+            serialized.FindProperty("_maxSpawnCount").intValue = 5;
+            serialized.FindProperty("_spawnCountIncreaseInterval").floatValue = 10.0f;
             serialized.FindProperty("_maxCapacity").intValue = 20;
             serialized.ApplyModifiedPropertiesWithoutUndo();
 

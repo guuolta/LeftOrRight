@@ -62,21 +62,30 @@ namespace InGame.Spawner
                     return;
                 }
 
-                // スポーン間隔を経過時間で短くする
-                var interval = Mathf.Max(
-                    _config.MinInterval,
-                    _config.InitialInterval - elapsed * _config.IntervalDecreasePerSec
-                );
-
-                await UniTask.WaitForSeconds(interval, cancellationToken: ct);
+                await UniTask.WaitForSeconds(_config.SpawnInterval, cancellationToken: ct);
 
                 if (ct.IsCancellationRequested)
                 {
                     break;
                 }
 
-                SpawnItem();
-                elapsed += interval;
+                // 経過時間に応じてスポーン数を増加
+                var spawnCount = Mathf.Min(
+                    _config.InitialSpawnCount + Mathf.FloorToInt(elapsed / _config.SpawnCountIncreaseInterval),
+                    _config.MaxSpawnCount
+                );
+
+                for (var i = 0; i < spawnCount; i++)
+                {
+                    // キャパシティを超えない範囲でスポーン
+                    if (_activeItemCount + i >= _config.MaxCapacity)
+                    {
+                        break;
+                    }
+                    SpawnItem();
+                }
+
+                elapsed += _config.SpawnInterval;
             }
         }
 
@@ -98,12 +107,62 @@ namespace InGame.Spawner
             var item = Instantiate(_postItemPrefab, _spawnPoint.position, Quaternion.identity, _thoughtBubbleParent);
             item.Initialize(config);
 
+            // 既存アイテムと重ならない位置を取得してアニメーション移動
+            var center = _thoughtBubbleView.transform.position;
+            var target = GetNonOverlappingPosition(center, halfW: 380f, halfH: 170f, itemW: 285f, itemH: 91f);
+            item.MoveToPosition(target);
+
             // 入力ハンドラーに登録
             _inputHandler.RegisterItem(item);
             _activeItemCount++;
+        }
 
-            // 仕分け完了時にカウントを減らす（Disposeを検知）
-            // GameObjectの非アクティブ化をUpdateで検知する方法を使用
+        /// <summary>
+        /// 既存アイテムと重ならないランダム位置を取得する。
+        /// 最大<c>maxAttempts</c>回試行し、見つからなければ最後の候補を返す。
+        /// </summary>
+        /// <param name="center">探索中心のワールド座標</param>
+        /// <param name="halfW">X方向の探索半径</param>
+        /// <param name="halfH">Y方向の探索半径</param>
+        /// <param name="itemW">アイテムの幅（重なり判定用、マージン込み）</param>
+        /// <param name="itemH">アイテムの高さ（重なり判定用、マージン込み）</param>
+        private Vector3 GetNonOverlappingPosition(Vector3 center, float halfW, float halfH, float itemW, float itemH)
+        {
+            const int MaxAttempts = 30;
+            var candidate = center;
+
+            for (var attempt = 0; attempt < MaxAttempts; attempt++)
+            {
+                candidate = center + new Vector3(
+                    Random.Range(-halfW, halfW),
+                    Random.Range(-halfH, halfH),
+                    0f
+                );
+
+                var overlaps = false;
+                foreach (Transform child in _thoughtBubbleParent)
+                {
+                    if (!child.gameObject.activeSelf)
+                    {
+                        continue;
+                    }
+
+                    var diff = child.position - candidate;
+                    if (Mathf.Abs(diff.x) < itemW && Mathf.Abs(diff.y) < itemH)
+                    {
+                        overlaps = true;
+                        break;
+                    }
+                }
+
+                if (!overlaps)
+                {
+                    return candidate;
+                }
+            }
+
+            // 全試行で重なりが解消できなかった場合は最後の候補をそのまま返す
+            return candidate;
         }
 
         private void Update()

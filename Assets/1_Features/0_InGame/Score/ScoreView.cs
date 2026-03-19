@@ -11,6 +11,15 @@ namespace InGame.Score
     {
         [SerializeField] private TextMeshProUGUI _scoreText;
 
+        private void Awake()
+        {
+            // 未アサイン時は子オブジェクトのTextMeshProUGUIを自動取得
+            if (_scoreText == null)
+            {
+                _scoreText = GetComponentInChildren<TextMeshProUGUI>();
+            }
+        }
+
         /// <summary>
         /// スコア表示を更新する。
         /// </summary>

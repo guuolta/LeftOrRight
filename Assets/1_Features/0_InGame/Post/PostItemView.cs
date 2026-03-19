@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 namespace InGame.Post
 {
@@ -14,7 +15,6 @@ namespace InGame.Post
         [SerializeField] private Image _iconImage;
         [SerializeField] private TextMeshProUGUI _labelText;
         [SerializeField] private Rigidbody2D _rigidbody2D;
-        [SerializeField] private Collider2D _collider2D;
 
         private PostType _postType;
         private bool _isDragging;
@@ -60,6 +60,59 @@ namespace InGame.Post
             }
 
             gameObject.SetActive(true);
+        }
+
+        /// <summary>
+        /// 指定のワールド座標へDOTweenでアニメーション移動する。
+        /// アニメーション中はKinematicに切り替え、完了後にDynamicへ戻す。
+        /// </summary>
+        /// <param name="target">移動先のワールド座標</param>
+        /// <param name="duration">移動時間（秒）</param>
+        public void MoveToPosition(Vector3 target, float duration = 0.5f)
+        {
+            // 競合する既存アニメーションをキャンセル
+            transform.DOKill();
+
+            // 物理演算とDOTweenの競合を防ぐためKinematicに切り替え
+            if (_rigidbody2D is not null)
+            {
+                _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+                _rigidbody2D.linearVelocity = Vector2.zero;
+                _rigidbody2D.angularVelocity = 0f;
+            }
+
+            transform.DOMove(target, duration)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() =>
+                {
+                    // ドラッグ中でなければDynamicに戻す
+                    if (_rigidbody2D is not null && !_isDragging)
+                    {
+                        _rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+                    }
+                });
+        }
+
+        /// <summary>
+        /// 親オブジェクトのローカル座標へDOTweenでアニメーション移動する。
+        /// スマホへのスタック時に使用する（ワールド座標系に依存しない）。
+        /// </summary>
+        /// <param name="localTarget">移動先のローカル座標</param>
+        /// <param name="duration">移動時間（秒）</param>
+        public void MoveToLocalPosition(Vector3 localTarget, float duration = 0.25f)
+        {
+            // 競合する既存アニメーションをキャンセル
+            transform.DOKill();
+
+            // スタック後はKinematicのまま維持（Dynamicに戻さない）
+            if (_rigidbody2D is not null)
+            {
+                _rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+                _rigidbody2D.linearVelocity = Vector2.zero;
+                _rigidbody2D.angularVelocity = 0f;
+            }
+
+            transform.DOLocalMove(localTarget, duration).SetEase(Ease.OutBack);
         }
 
         /// <inheritdoc/>

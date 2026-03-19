@@ -9,14 +9,17 @@ namespace InGame.Spawner
     [CreateAssetMenu(fileName = "SpawnerConfig", menuName = "InGame/SpawnerConfig")]
     public class SpawnerConfigSO : ScriptableObject
     {
-        [Header("初期スポーン間隔（秒）")]
-        [SerializeField] private float _initialInterval = 2.0f;
+        [Header("スポーン間隔（秒）")]
+        [SerializeField] private float _spawnInterval = 2.0f;
 
-        [Header("最小スポーン間隔（秒）")]
-        [SerializeField] private float _minInterval = 0.3f;
+        [Header("初期スポーン数（1ティックあたりの生成数）")]
+        [SerializeField] private int _initialSpawnCount = 1;
 
-        [Header("時間経過による間隔減少量（秒/秒）")]
-        [SerializeField] private float _intervalDecreasePerSec = 0.02f;
+        [Header("スポーン数の上限")]
+        [SerializeField] private int _maxSpawnCount = 5;
+
+        [Header("スポーン数が+1される間隔（秒）")]
+        [SerializeField] private float _spawnCountIncreaseInterval = 10f;
 
         [Header("吹き出しエリアのキャパシティ上限（個数）")]
         [SerializeField] private int _maxCapacity = 20;
@@ -24,14 +27,17 @@ namespace InGame.Spawner
         [Header("スポーン可能な投稿設定一覧")]
         [SerializeField] private PostItemConfigSO[] _postConfigs;
 
-        /// <summary>初期スポーン間隔（秒）</summary>
-        public float InitialInterval => _initialInterval;
+        /// <summary>スポーン間隔（秒）</summary>
+        public float SpawnInterval => _spawnInterval;
 
-        /// <summary>最小スポーン間隔（秒）</summary>
-        public float MinInterval => _minInterval;
+        /// <summary>初期スポーン数</summary>
+        public int InitialSpawnCount => _initialSpawnCount;
 
-        /// <summary>時間経過による間隔減少量</summary>
-        public float IntervalDecreasePerSec => _intervalDecreasePerSec;
+        /// <summary>スポーン数の上限</summary>
+        public int MaxSpawnCount => _maxSpawnCount;
+
+        /// <summary>スポーン数が+1される間隔（秒）</summary>
+        public float SpawnCountIncreaseInterval => _spawnCountIncreaseInterval;
 
         /// <summary>吹き出しエリアの最大キャパシティ</summary>
         public int MaxCapacity => _maxCapacity;
