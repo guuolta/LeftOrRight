@@ -13,7 +13,6 @@
     "com.unity.visualscripting": "1.9.9",
     "com.cysharp.unitask": "2.5.10",
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
-    "com.cysharp.observablecollections": "https://github.com/Cysharp/ObservableCollections.git?path=src/ObservableCollections.Unity/Assets/ObservableCollections#2.2.4",
     "com.cysharp.zstring": "2.6.0",
     "jp.hadashikick.vcontainer": "1.16.8",
     "com.unity.modules.accessibility": "1.0.0",
