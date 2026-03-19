@@ -13,8 +13,8 @@ namespace InGame.UI
         [Header("タイトルテキスト")]
         [SerializeField] private TextMeshProUGUI _titleText;
 
-        [Header("操作説明テキスト")]
-        [SerializeField] private TextMeshProUGUI _instructionText;
+        [Header("操作説明テキスト（点滅用CanvasGroupをアタッチ）")]
+        [SerializeField] private CanvasGroup _instructionCanvasGroup;
 
         [Header("スタートボタン")]
         [SerializeField] private Button _startButton;
@@ -34,10 +34,10 @@ namespace InGame.UI
             _onStart = onStart;
             _startButton?.onClick.AddListener(OnStartClicked);
 
-            // 操作説明テキストを点滅させる
-            if (_instructionText is not null)
+            // 操作説明テキストを点滅させる（CanvasGroupのalphaをアニメーション）
+            if (_instructionCanvasGroup is not null)
             {
-                _blinkTweener = _instructionText
+                _blinkTweener = _instructionCanvasGroup
                     .DOFade(0f, _blinkInterval)
                     .SetLoops(-1, LoopType.Yoyo)
                     .SetEase(Ease.InOutSine);
