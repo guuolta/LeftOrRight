@@ -73,10 +73,10 @@ namespace InGame.UI
             if (_panelCanvasGroup is not null)
             {
                 _panelCanvasGroup.alpha = 0f;
-                await DOVirtual
+                DOVirtual
                     .Float(0f, 1f, _fadeInDuration, v => _panelCanvasGroup.alpha = v)
-                    .SetEase(Ease.OutQuad)
-                    .ToUniTask(cancellationToken: ct);
+                    .SetEase(Ease.OutQuad);
+                await UniTask.WaitForSeconds(_fadeInDuration, cancellationToken: ct);
             }
         }
 
