@@ -34,11 +34,11 @@ namespace InGame.UI
             _onStart = onStart;
             _startButton?.onClick.AddListener(OnStartClicked);
 
-            // 操作説明テキストを点滅させる（CanvasGroupのalphaをアニメーション）
+            // 操作説明テキストを点滅させる（DOVirtualでalphaを直接操作）
             if (_instructionCanvasGroup is not null)
             {
-                _blinkTweener = _instructionCanvasGroup
-                    .DOFade(0f, _blinkInterval)
+                _blinkTweener = DOVirtual
+                    .Float(1f, 0f, _blinkInterval, v => _instructionCanvasGroup.alpha = v)
                     .SetLoops(-1, LoopType.Yoyo)
                     .SetEase(Ease.InOutSine);
             }
