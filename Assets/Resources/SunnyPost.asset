@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: InGame::InGame.Post.PostItemConfigSO
   _postType: 0
   _color: {r: 1, g: 0.98039216, b: 0.8039216, a: 1}
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 4f610270a2a134b2ba2ee7bb1d1abab1, type: 3}
   _label: "\u2600 \u4ECA\u65E5\u3082\u6674\u308C"

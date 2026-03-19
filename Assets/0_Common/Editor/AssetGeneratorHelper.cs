@@ -208,6 +208,98 @@ namespace Common.Editor
             Debug.Log($"[AssetGeneratorHelper] フォントアセット作成完了（Texture・Material付き）: {assetPath}");
         }
 
+        // ========== PostItem アイコン ==========
+
+        [MenuItem("Tools/InGame Setup/Create and Assign Post Icons")]
+        public static void CreateAndAssignPostIcons()
+        {
+            // 各 SO 名・ラベル略称・ベースカラーを定義
+            var configs = new[]
+            {
+                ("CafePost",  "Cafe",  "FFE4B5"),
+                ("LikePost",  "Like",  "FFB6C1"),
+                ("SunnyPost", "Sunny", "FFFACD"),
+                ("AngerPost", "Anger", "8B0000"),
+                ("SkullPost", "Skull", "2F2F2F"),
+                ("TrashPost", "Trash", "4A4A4A"),
+            };
+
+            const string iconDir = "Assets/1_Features/0_InGame/Post/Icons";
+
+            // フォルダが無ければ作成
+            if (!AssetDatabase.IsValidFolder(iconDir))
+                AssetDatabase.CreateFolder("Assets/1_Features/0_InGame/Post", "Icons");
+
+            foreach (var (soName, iconName, hex) in configs)
+            {
+                ColorUtility.TryParseHtmlString("#" + hex, out var baseColor);
+
+                // アイコンスプライトを生成（64×64 の円）
+                var spritePath = $"{iconDir}/{iconName}Icon.png";
+                var sprite     = CreateOrLoadIcon(spritePath, 64, baseColor);
+                if (sprite == null) continue;
+
+                // SO の _icon フィールドに設定
+                var soPath = $"Assets/Resources/{soName}.asset";
+                var so     = AssetDatabase.LoadAssetAtPath<ScriptableObject>(soPath);
+                if (so == null)
+                {
+                    Debug.LogWarning($"[AssetGeneratorHelper] SO が見つかりません: {soPath}");
+                    continue;
+                }
+
+                var serialized = new SerializedObject(so);
+                serialized.FindProperty("_icon").objectReferenceValue = sprite;
+                serialized.ApplyModifiedProperties();
+                Debug.Log($"[AssetGeneratorHelper] {soName}._icon にスプライトを設定: {spritePath}");
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[AssetGeneratorHelper] PostItem アイコン生成・設定完了");
+        }
+
+        /// <summary>
+        /// 指定パスにアイコン用円スプライトを作成して返す。既存なら読み込んで返す。
+        /// </summary>
+        private static Sprite CreateOrLoadIcon(string assetPath, int size, Color baseColor)
+        {
+            // 既存の場合はそのまま返す
+            var existing = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (existing != null) return existing;
+
+            // 円スプライトをテクスチャ描画で生成
+            var tex     = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var pixels  = new Color[size * size];
+            var center  = size * 0.5f;
+            var radius  = center - 1f;
+            // 外枠（白）と内側（baseColor）の二重円で視認性を確保
+            var rimColor = Color.white;
+
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var dx   = x - center;
+                    var dy   = y - center;
+                    var dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (dist <= radius - 4f)
+                        pixels[y * size + x] = baseColor;
+                    else if (dist <= radius)
+                        pixels[y * size + x] = rimColor;
+                    else
+                        pixels[y * size + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            SaveTexture(tex, assetPath);
+            Object.DestroyImmediate(tex);
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        }
+
         // ========== スプライト ==========
 
         [MenuItem("Tools/InGame Setup/Create All Sprites")]
