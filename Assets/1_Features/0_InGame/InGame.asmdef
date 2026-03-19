@@ -6,7 +6,8 @@
         "UniTask",
         "R3.Unity",
         "DOTween.Modules",
-        "VContainer"
+        "VContainer",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
