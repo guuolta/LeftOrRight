@@ -13,7 +13,7 @@
     "com.unity.visualscripting": "1.9.9",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
-    "com.cysharp.observablecollections": "https://github.com/Cysharp/ObservableCollections.git?path=src/ObservableCollections.Unity/Assets/ObservableCollections",
+
     "com.cysharp.zstring": "https://github.com/Cysharp/ZString.git?path=src/ZString.Unity/Assets/Scripts/ZString",
     "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer",
     "com.unity.modules.accessibility": "1.0.0",
