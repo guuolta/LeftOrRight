@@ -258,6 +258,118 @@ namespace Common.Editor
             Debug.Log("[SceneSetupHelper] SpawnerConfig.PostConfigs 設定完了");
         }
 
+        [MenuItem("Tools/InGame Setup/Apply UI Layout 1920x1080")]
+        public static void ApplyUILayout()
+        {
+            var canvasGo        = GameObject.Find("Canvas");
+            var headerGo        = canvasGo?.transform.Find("[UI] Header");
+            var scoreTextGo     = headerGo?.Find("ScoreText");
+            var publicPhoneGo   = canvasGo?.transform.Find("[UI] PublicPhone");
+            var privatePhoneGo  = canvasGo?.transform.Find("[UI] PrivatePhone");
+            var thoughtBubbleGo = canvasGo?.transform.Find("[UI] ThoughtBubble");
+            var gameOverPanelGo = canvasGo?.transform.Find("[UI] GameOverPanel");
+            var titlePanelGo    = canvasGo?.transform.Find("[UI] TitlePanel");
+            var instrGroupGo    = titlePanelGo?.Find("InstructionCanvasGroup");
+
+            // ─── Header（画面上部・Transform 親） ──────────────────
+            // Canvas の ScreenSpace Overlay 座標系: 中央=(0,0)、上端=y+540
+            SetPos(headerGo, new Vector3(0, 490, 0));
+            // ScoreText（Header の子・RectTransform）
+            SetRect(scoreTextGo, anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(600, 70));
+
+            // ─── PublicPhone（左上） ─────────────────────────────
+            SetPos(publicPhoneGo, new Vector3(-700, 220, 0));
+            SetRect(publicPhoneGo?.Find("Image"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
+            SetRect(publicPhoneGo?.Find("HighlightImage"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
+
+            // ─── PrivatePhone（右上） ────────────────────────────
+            SetPos(privatePhoneGo, new Vector3(700, 220, 0));
+            SetRect(privatePhoneGo?.Find("Image"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
+            SetRect(privatePhoneGo?.Find("HighlightImage"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(240, 420));
+
+            // ─── ThoughtBubble（中央エリア） ─────────────────────
+            SetPos(thoughtBubbleGo, new Vector3(0, -80, 0));
+            SetRect(thoughtBubbleGo?.Find("Image"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(1100, 520));
+
+            // ─── GameOverPanel（画面中央・Transform 親） ───────────
+            SetPos(gameOverPanelGo, Vector3.zero);
+            SetRect(gameOverPanelGo?.Find("ReasonText"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, 100), size: new Vector2(900, 90));
+            SetRect(gameOverPanelGo?.Find("FinalScoreText"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, -10), size: new Vector2(600, 70));
+            SetRect(gameOverPanelGo?.Find("RetryButton"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, -140), size: new Vector2(300, 80));
+
+            // ─── TitlePanel（画面中央・Transform 親） ─────────────
+            SetPos(titlePanelGo, Vector3.zero);
+            SetRect(titlePanelGo?.Find("TitleText"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, 220), size: new Vector2(900, 130));
+            // InstructionCanvasGroup（Transform 親）
+            SetPos(instrGroupGo, new Vector3(0, 20, 0));
+            SetRect(instrGroupGo?.Find("InstructionText"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(1000, 320));
+            SetRect(titlePanelGo?.Find("StartButton"),
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, -220), size: new Vector2(320, 90));
+
+            UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
+            Debug.Log("[SceneSetupHelper] UIレイアウト 1920x1080 適用完了");
+        }
+
+        /// <summary>
+        /// Transform の LocalPosition を設定する（RectTransform のない Canvas 子オブジェクト用）。
+        /// </summary>
+        private static void SetPos(Transform t, Vector3 localPos)
+        {
+            if (t == null) return;
+            // RectTransform が存在する場合は anchoredPosition で設定
+            var rt = t.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                var so = new SerializedObject(rt);
+                so.FindProperty("m_AnchoredPosition").vector2Value = new Vector2(localPos.x, localPos.y);
+                so.ApplyModifiedProperties();
+                return;
+            }
+            // Transform のみの場合は localPosition を直接代入してダーティフラグを立てる
+            t.localPosition = localPos;
+            EditorUtility.SetDirty(t);
+        }
+
+        /// <summary>
+        /// RectTransform のアンカー・位置・サイズを一括設定する。
+        /// </summary>
+        private static void SetRect(Transform t, Vector2 anchorMin, Vector2 anchorMax,
+                                    Vector2 pivot, Vector2 pos, Vector2 size)
+        {
+            if (t == null) return;
+            var rt = t.GetComponent<RectTransform>();
+            if (rt == null) return;
+            var so = new SerializedObject(rt);
+            so.FindProperty("m_AnchorMin").vector2Value         = anchorMin;
+            so.FindProperty("m_AnchorMax").vector2Value         = anchorMax;
+            so.FindProperty("m_Pivot").vector2Value             = pivot;
+            so.FindProperty("m_AnchoredPosition").vector2Value  = pos;
+            so.FindProperty("m_SizeDelta").vector2Value         = size;
+            so.ApplyModifiedProperties();
+        }
+
         [MenuItem("Tools/InGame Setup/Create PostItem Prefab")]
         public static void CreatePostItemPrefab()
         {
