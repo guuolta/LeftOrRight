@@ -8,11 +8,9 @@ namespace InGame.Post
     [CreateAssetMenu(fileName = "PostItemConfig", menuName = "InGame/PostItemConfig")]
     public class PostItemConfigSO : ScriptableObject
     {
-        [Header("種別")]
-        [SerializeField] private PostType _postType;
+        [Header("種別")] [SerializeField] private PostType _postType;
 
-        [Header("見た目")]
-        [SerializeField] private Color _color = Color.white;
+        [Header("見た目")] [SerializeField] private Color _color = Color.white;
         [SerializeField] private Sprite _icon;
         [SerializeField] private string _label;
 

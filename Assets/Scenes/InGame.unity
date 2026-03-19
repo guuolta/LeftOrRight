@@ -686,7 +686,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: InGame::InGame.SortArea.SortAreaView
   _acceptedPostType: 0
   _rectTransform: {fileID: 0}
-  _highlightImage: {fileID: 0}
+  _highlightImage: {fileID: 1443462802}
 --- !u!1 &655584958
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,11 +767,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d414c2c5f4c1495ab961835b16ddc2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InGame::InGame.Spawner.PostSpawner
-  _config: {fileID: 0}
-  _postItemPrefab: {fileID: 0}
-  _spawnPoint: {fileID: 0}
-  _thoughtBubbleParent: {fileID: 0}
-  _thoughtBubbleView: {fileID: 0}
+  _config: {fileID: 11400000, guid: 4404e62b92d4e45478a3ff70d483fe84, type: 2}
+  _postItemPrefab: {fileID: 6541581528358346012, guid: 9b2b5edfb0f504392aabd704935d5221, type: 3}
+  _spawnPoint: {fileID: 957070372}
+  _thoughtBubbleParent: {fileID: 1946722104}
+  _thoughtBubbleView: {fileID: 655584960}
 --- !u!4 &838352969
 Transform:
   m_ObjectHideFlags: 0
@@ -836,10 +836,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a179ffbc0e5e44008479815a541adc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InGame::InGame.UI.GameOverView
-  _panelCanvasGroup: {fileID: 0}
-  _reasonText: {fileID: 0}
-  _finalScoreText: {fileID: 0}
-  _retryButton: {fileID: 0}
+  _panelCanvasGroup: {fileID: 858882509}
+  _reasonText: {fileID: 1160450233}
+  _finalScoreText: {fileID: 1563403859}
+  _retryButton: {fileID: 1849762317}
   _fadeInDuration: 0.5
 --- !u!225 &858882509
 CanvasGroup:
@@ -1125,11 +1125,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aabd086fe4ec4f0d8ab854152267ff0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InGame::InGame.GameFlow.InGamePresenter
-  _inputHandler: {fileID: 0}
-  _postSpawner: {fileID: 0}
-  _scoreView: {fileID: 0}
-  _gameOverView: {fileID: 0}
-  _thoughtBubbleParent: {fileID: 0}
+  _inputHandler: {fileID: 1428401142}
+  _postSpawner: {fileID: 838352968}
+  _scoreView: {fileID: 313095319}
+  _gameOverView: {fileID: 858882508}
+  _thoughtBubbleParent: {fileID: 1946722104}
 --- !u!4 &1049941651
 Transform:
   m_ObjectHideFlags: 0
@@ -1506,8 +1506,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aba6b3d7cb81467b982d6beb4bb590f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InGame::InGame.Input.PostInputHandler
-  _sortAreas: []
-  _mainCamera: {fileID: 0}
+  _sortAreas:
+  - {fileID: 523387025}
+  - {fileID: 1770626492}
+  _mainCamera: {fileID: 114868385}
 --- !u!4 &1428401143
 Transform:
   m_ObjectHideFlags: 0
@@ -1645,9 +1647,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68036e3d20e184aa6ad4af79d1369b01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InGame::InGame.UI.TitleView
-  _titleText: {fileID: 0}
-  _instructionCanvasGroup: {fileID: 0}
-  _startButton: {fileID: 0}
+  _titleText: {fileID: 93565412}
+  _instructionCanvasGroup: {fileID: 1283449928}
+  _startButton: {fileID: 1919268234}
   _blinkInterval: 0.8
 --- !u!1 &1563403857
 GameObject:
@@ -1832,9 +1834,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5a5412aea83749c4a375bec29d4e728, type: 3}
   m_Name: 
   m_EditorClassIdentifier: InGame::InGame.SortArea.SortAreaView
-  _acceptedPostType: 0
+  _acceptedPostType: 1
   _rectTransform: {fileID: 0}
-  _highlightImage: {fileID: 0}
+  _highlightImage: {fileID: 1409789151}
 --- !u!1 &1849762315
 GameObject:
   m_ObjectHideFlags: 0
