@@ -16,7 +16,10 @@ namespace InGame.UI
         [Header("ゲームオーバーパネル")]
         [SerializeField] private CanvasGroup _panelCanvasGroup;
 
-        [Header("原因別メッセージテキスト")]
+        [Header("ヘッダーテキスト（炎上など）")]
+        [SerializeField] private TextMeshProUGUI _headerText;
+
+        [Header("内容テキスト（ゲームオーバーの理由）")]
         [SerializeField] private TextMeshProUGUI _reasonText;
 
         [Header("最終スコアテキスト")]
@@ -52,21 +55,36 @@ namespace InGame.UI
         {
             gameObject.SetActive(true);
 
-            // 原因メッセージの設定
+            // ヘッダーテキストの設定
+            if (_headerText is not null)
+            {
+                _headerText.text = reason switch
+                {
+                    GameOverReason.WrongOperation => "炎上！！",
+                    GameOverReason.CapacityOver => "脳内パンク！",
+                    GameOverReason.TimeOver => "記憶喪失！",
+                    GameOverReason.OutsideDrop => "ど忘れ！",
+                    _ => "ゲームオーバー",
+                };
+            }
+
+            // 内容テキストの設定
             if (_reasonText is not null)
             {
                 _reasonText.text = reason switch
                 {
-                    GameOverReason.WrongOperation => "炎上！！\n投稿を誤爆しました...",
-                    GameOverReason.CapacityOver => "脳内パンク！\n処理しきれなくなりました...",
-                    _ => "ゲームオーバー",
+                    GameOverReason.WrongOperation => "投稿を誤爆してしまった...",
+                    GameOverReason.CapacityOver => "処理しきれなくなってしまった...",
+                    GameOverReason.TimeOver => "アイデアをすっかり忘れてしまった...",
+                    GameOverReason.OutsideDrop => "アイデアが頭から抜けてしまった...",
+                    _ => "",
                 };
             }
 
             // 最終スコアの設定
             if (_finalScoreText is not null)
             {
-                _finalScoreText.text = $"FINAL SCORE: {finalScore}";
+                _finalScoreText.text = $"{finalScore}いいね";
             }
 
             // フェードイン
