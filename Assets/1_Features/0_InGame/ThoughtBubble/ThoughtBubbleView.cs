@@ -14,19 +14,20 @@ namespace InGame.ThoughtBubble
         [Header("背景イメージ（警告色変化に使用）")]
         [SerializeField] private Image _backgroundImage;
 
-        [Header("通常時の背景色")]
-        [SerializeField] private Color _normalColor = new(0.9f, 0.9f, 1.0f, 0.8f);
+        [Header("通常時の背景色（白）")]
+        [SerializeField] private Color _normalColor = new(1.0f, 1.0f, 1.0f, 0.8f);
 
-        [Header("警告時の背景色（キャパシティ80%以上）")]
-        [SerializeField] private Color _warningColor = new(1.0f, 0.6f, 0.4f, 0.9f);
+        [Header("警告時の背景色（10個超えたら黄色）")]
+        [SerializeField] private Color _warningColor = new(1.0f, 0.9f, 0.0f, 0.9f);
 
-        [Header("危険時の背景色（キャパシティ90%以上）")]
+        [Header("危険時の背景色（15個超えたら赤）")]
         [SerializeField] private Color _dangerColor = new(1.0f, 0.2f, 0.2f, 1.0f);
 
-        [Header("子オブジェクトの投稿ネタの上限ライン（割合 0〜1）")]
-        [SerializeField] private float _warningThreshold = 0.8f;
+        [Header("警告色に変わるアイテム数（これを超えたら黄色）")]
+        [SerializeField] private int _warningThreshold = 10;
 
-        [SerializeField] private float _dangerThreshold = 0.9f;
+        [Header("危険色に変わるアイテム数（これを超えたら赤）")]
+        [SerializeField] private int _dangerThreshold = 15;
 
         // 警告アニメーション用Tweener
         private Tweener _shakeTweener;
@@ -57,15 +58,16 @@ namespace InGame.ThoughtBubble
                 return;
             }
 
-            // キャパシティ状態に応じて背景色を変化させる
-            if (ratio >= _dangerThreshold)
+            // アイテム数に応じて背景色を変化させる
+            if (currentCount > _dangerThreshold)
             {
                 _backgroundImage.color = _dangerColor;
                 TriggerShake();
             }
-            else if (ratio >= _warningThreshold)
+            else if (currentCount > _warningThreshold)
             {
                 _backgroundImage.color = _warningColor;
+                _shakeTweener?.Kill(true);
             }
             else
             {

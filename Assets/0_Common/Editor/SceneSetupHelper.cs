@@ -281,9 +281,14 @@ namespace Common.Editor
             // ─── Header（画面上部・Transform 親） ──────────────────
             // Canvas の ScreenSpace Overlay 座標系: 中央=(0,0)、上端=y+540
             SetPos(headerGo, new Vector3(0, 490, 0));
-            // ScoreText（Header の子・RectTransform）
+            // ハートアイコン（Header の子）
+            var heartGo = headerGo?.Find("HeartImage");
+            SetRect(heartGo, anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(-45, 0), size: new Vector2(55, 55));
+
+            // ScoreText（ハートの右横・数値のみ表示）
             SetRect(scoreTextGo, anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(600, 70));
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(20, 0), size: new Vector2(160, 70));
 
             // ─── PublicPhone（左上） ─────────────────────────────
             SetPos(publicPhoneGo, new Vector3(-700, 220, 0));
@@ -303,17 +308,18 @@ namespace Common.Editor
                     anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
                     pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(1100, 520));
 
-            // ─── GameOverPanel（画面中央・Transform 親） ───────────
+            // ─── GameOverPanel（800×800正方形フレーム画像に合わせたレイアウト） ───
             SetPos(gameOverPanelGo, Vector3.zero);
+            SetRect(gameOverPanelGo,
+                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
+                    pivot: Vector2.one * 0.5f, pos: Vector2.zero, size: new Vector2(800, 800));
             SetRect(gameOverPanelGo?.Find("ReasonText"),
                     anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, 100), size: new Vector2(900, 90));
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, 200), size: new Vector2(680, 130));
             SetRect(gameOverPanelGo?.Find("FinalScoreText"),
                     anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, -10), size: new Vector2(600, 70));
-            SetRect(gameOverPanelGo?.Find("RetryButton"),
-                    anchorMin: Vector2.one * 0.5f, anchorMax: Vector2.one * 0.5f,
-                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, -140), size: new Vector2(300, 80));
+                    pivot: Vector2.one * 0.5f, pos: new Vector2(0, 70), size: new Vector2(500, 70));
+            SetPos(gameOverPanelGo?.Find("RetryButton"), new Vector3(0, -230, 0));
 
             // ─── TitlePanel（画面中央・Transform 親） ─────────────
             SetPos(titlePanelGo, Vector3.zero);

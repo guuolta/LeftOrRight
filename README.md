@@ -1,4 +1,4 @@
-# LeftOrRight（仮）
+# RightOrLeft
 
 表垢・裏垢をテーマにした、SNS投稿ネタ仕分けアクションゲームです。
 
@@ -9,23 +9,63 @@
 左下の頭アイコンから「投稿ネタ」が次々と出てきます。
 それが **表に出せるネタ（Public）** なのか **裏に隠すネタ（Private）** なのかを素早く判断して、
 左右のスマホに振り分けてください。
-時間が経つほど投稿が増えていき、頭のキャパシティがパンクするとゲームオーバー。
-誤った方向に投稿しても即ゲームオーバーです。
+
+投稿ネタには **有効期限（10秒）** があり、時間が経つほど激しく揺れ始めます。
+スコアが上がるほどスポーン間隔が短くなり、同時に出てくる数も増えていきます。
 
 ### 操作方法
 
 | 操作 | 効果 |
 |------|------|
-| **左クリック** でドラッグ | 表ネタ（Public）として掴む → 左上のスマホへ |
-| **右クリック** でドラッグ | 裏ネタ（Private）として掴む → 右上のスマホへ |
+| **左クリック / タップ** でドラッグ | 投稿ネタを掴む（種別問わず） |
 | ドラッグ先でリリース | 仕分け完了 |
+
+- **左スマホ（表垢）** → 表ネタ（Public）を置く
+- **右スマホ（裏垢）** → 裏ネタ（Private）を置く
+- スマホに少しでも触れれば置いた判定になる
+- 吹き出しエリア内に戻せば掴み直せる
 
 ### ゲームオーバー条件
 
-| 条件 | メッセージ |
-|------|-----------|
-| 表ネタを右クリック or 裏ネタを左クリック | 炎上！！投稿を誤爆しました... |
-| 吹き出しエリアがキャパシティ上限（20個）を超える | 脳内パンク！処理しきれなくなりました... |
+| 条件 | ヘッダー | 内容 |
+|------|---------|------|
+| 間違ったスマホにドロップ | 炎上！！ | 投稿を誤爆してしまった... |
+| 吹き出しがキャパシティ超過 | 脳内パンク！ | 処理しきれなくなってしまった... |
+| 有効期限切れ（放置） | 記憶喪失！ | アイデアをすっかり忘れてしまった... |
+| 吹き出しエリア外にドロップ | ど忘れ！ | アイデアが頭から抜けてしまった... |
+
+---
+
+## 難易度
+
+### スポーン間隔
+
+スコアに応じてスポーン間隔が短くなります。
+
+| スコア | スポーン間隔 |
+|--------|------------|
+| 0〜9   | SpawnerConfig の初期値 |
+| 10〜39 | 2.0 秒 |
+| 40〜49 | 1.95 秒 |
+| 50〜59 | 1.85 秒 |
+| 60〜69 | 1.8 秒 |
+| 70〜79 | 1.75 秒 |
+| 80〜89 | 1.7 秒 |
+| 90〜99 | 1.67 秒 |
+| 100〜109 | 1.64 秒 |
+| 110〜119 | 1.61 秒 |
+| 120〜129 | 1.59 秒 |
+| 130〜139 | 1.56 秒 |
+| 140〜149 | 1.53 秒 |
+| 150 以上 | 1.5 秒（最速） |
+
+### スポーン数
+
+| スコア | 1ティックあたりのスポーン数 |
+|--------|--------------------------|
+| 0〜19  | 1個 |
+| 20〜79 | 2個 |
+| 80 以上 | 3個 |
 
 ---
 
@@ -36,11 +76,12 @@
 │  [表垢スマホ]   [裏垢スマホ] │  ← PublicPhone / PrivatePhone
 │                             │
 │       [吹き出しエリア]       │  ← 投稿ネタがスポーンする場所
-│                             │
+│  ♥ スコア表示               │
 │  [頭アイコン]               │  ← SpawnPoint（左下）
 └─────────────────────────────┘
-         スコア表示（上部）
 ```
+
+スマホ画面には仕分けた投稿がスタック表示されます（ScrollViewで新着が上に積まれ、下が少し欠けて見えます）。
 
 ---
 
@@ -60,10 +101,9 @@
 | UniTask | 非同期処理 |
 | DOTween | アニメーション |
 | R3 | リアクティブプログラミング |
-| ObservableCollections | R3連携コレクション |
 | ZString | 高速文字列処理（GC削減） |
 | TextMesh Pro | UIテキスト |
-| Unity InputSystem | 入力処理 |
+| Unity InputSystem | 入力処理（マウス・タッチ対応） |
 | NuGetForUnity | NuGetパッケージ管理 |
 | UniCLI | Unityエディタ操作CLI |
 
@@ -74,33 +114,26 @@
 ```
 Assets/
 ├── 0_Common/               # 共通アセット・ユーティリティ
-│   ├── Editor/             # エディタ拡張ツール（後述）
+│   ├── Editor/             # エディタ拡張ツール
 │   ├── Fonts/              # フォントアセット
-│   └── Sprites/            # 共通スプライト
+│   ├── Sprites/            # 共通スプライト・TitleLogo
+│   └── UI/                 # 共通UIコンポーネント
 └── 1_Features/
     └── 0_InGame/           # ゲーム本体
         ├── GameFlow/       # ゲーム状態管理（Model・Presenter）
-        ├── Input/          # 入力ハンドラー
+        ├── Input/          # 入力ハンドラー（マウス・タッチ統合）
         ├── Post/           # 投稿ネタ（Model・View・Config）
-        │   ├── Prefabs/    # PostItem.prefab
-        │   └── Icons/      # アイコン画像（手動配置が必要）
+        │   └── Prefabs/    # PostItem.prefab
         ├── Score/          # スコア管理
-        ├── SortArea/       # 仕分けエリア
+        ├── SortArea/       # 仕分けエリア・スマホScrollView表示
         ├── Spawner/        # 投稿スポーナー
         ├── ThoughtBubble/  # 吹き出しエリア
-        └── UI/             # タイトル・ゲームオーバー画面
+        └── UI/             # タイトル・カウントダウン・ゲームオーバー画面
 
-Packages/
-└── manifest.json           # パッケージ依存定義
-
-Assets/Resources/           # ScriptableObject（自動生成）
+Assets/Resources/           # ScriptableObject
 ├── SpawnerConfig.asset     # スポーン設定
-├── CafePost.asset          # 表ネタ設定 ×3
-├── LikePost.asset
-├── SunnyPost.asset
-├── AngerPost.asset         # 裏ネタ設定 ×3
-├── SkullPost.asset
-└── TrashPost.asset
+├── PublicPost.asset        # 表ネタ設定（ランダムラベル対応）
+└── PrivatePost.asset       # 裏ネタ設定（ランダムラベル対応）
 ```
 
 ---
@@ -119,13 +152,19 @@ Presenter  ViewとModelをバインド。ゲームループを管理
 
 | クラス | 役割 |
 |-------|------|
-| `GameModel` | ゲーム状態（Idle / Playing / GameOver）・経過時間管理 |
+| `GameModel` | ゲーム状態（Idle / Playing / GameOver）管理 |
 | `ScoreModel` | スコアのReactiveProperty管理 |
-| `PostItemView` | 投稿ネタの表示・ドラッグ制御（Rigidbody2D連携） |
-| `PostInputHandler` | 左/右クリックドラッグ＆ドロップ・誤爆判定 |
-| `PostSpawner` | 非同期スポーンループ・時間加速 |
-| `SortAreaView` | 仕分けエリアのヒット判定・ハイライト |
-| `InGamePresenter` | 全体を束ねるゲームループ制御 |
+| `InGamePresenter` | タイトル→カウントダウン→ゲームループ全体を制御 |
+| `TitleView` | タイトル画面表示・左クリック/タップ待機 |
+| `CountdownView` | 3→2→1カウントダウンアニメーション |
+| `GameOverView` | ゲームオーバー画面表示（ヘッダー/内容/スコア）・リトライ処理 |
+| `PostItemView` | 投稿ネタの表示・ドラッグ制御・有効期限シェイクアニメーション |
+| `PostItemConfigSO` | 投稿ネタの設定（ラベル複数候補からランダム選択） |
+| `PostInputHandler` | 左クリック/タップによるドラッグ＆ドロップ（マウス・タッチ統合） |
+| `PostSpawner` | 非同期スポーンループ・スコア連動難易度 |
+| `SortAreaView` | 仕分けエリアのAABB判定・スマホスタック管理 |
+| `PhoneStackView` | スマホへの投稿ScrollView表示（新着が上・下端クリップ） |
+| `ThoughtBubbleView` | 吹き出しエリアの色変化・揺れ警告 |
 
 ---
 
@@ -151,25 +190,7 @@ Unity 6000.3.9f1 で開いてください。
 ### 4. シーンを開く
 
 `Assets/Scenes/InGame.unity` を開けばすぐにプレイできます。
-全コンポーネントの参照配線・ScriptableObjectは自動生成済みです。
-
----
-
-## エディタツール（Tools/InGame Setup）
-
-`Tools → InGame Setup` メニューから以下の操作が行えます。
-
-| メニュー | 内容 |
-|---------|------|
-| **Wire Up Scene References** | シーン内の全コンポーネント参照を自動配線し直す |
-| **Create All ScriptableObjects** | SpawnerConfig・PostItemConfig×6を再生成 |
-| **Create PostItem Prefab** | PostItemプレハブを再生成 |
-| **Create Japanese Font Asset** | ヒラギノSDF フォントアセットを生成（macOS必須） |
-| **Create All Sprites** | 基本スプライト（角丸矩形・楕円・円）を生成 |
-| **Apply Fonts and Sprites** | フォント・スプライトをシーンに適用 |
-| **Set TMP Default Font** | TMP Settings のデフォルトフォントを設定 |
-
-> シーンを壊してしまった場合は **Wire Up Scene References** → **Apply Fonts and Sprites** の順で実行すれば復元できます。
+全コンポーネントの参照配線・ScriptableObjectは設定済みです。
 
 ---
 
@@ -177,34 +198,14 @@ Unity 6000.3.9f1 で開いてください。
 
 `Assets/Resources/SpawnerConfig.asset` で調整できます。
 
-| パラメータ | デフォルト値 | 説明 |
-|-----------|------------|------|
-| Initial Interval | 2.0 秒 | 最初のスポーン間隔 |
-| Min Interval | 0.3 秒 | スポーン間隔の下限 |
-| Interval Decrease Per Sec | 0.02 秒/秒 | 時間経過による間隔の短縮量 |
-| Max Capacity | 20 個 | 吹き出しエリアのキャパシティ上限 |
+| パラメータ | 説明 |
+|-----------|------|
+| Spawn Interval | 基本スポーン間隔（スコア0〜9で適用） |
+| Initial Spawn Count | 1ティックあたりの初期スポーン数 |
+| Max Spawn Count | スポーン数の上限 |
+| Max Capacity | 吹き出しエリアのキャパシティ上限 |
 
-投稿ネタの種類・色・ラベルは `Assets/Resources/〇〇Post.asset` で変更できます。
-
----
-
-## 投稿ネタ一覧
-
-### 表ネタ（Public → 左スマホへ）
-
-| 名前 | 色 | ラベル |
-|------|----|-------|
-| CafePost | #FFE4B5（ベージュ） | ☕ カフェに来た |
-| LikePost | #FFB6C1（ピンク） | ♥ いいね！ |
-| SunnyPost | #FFFACD（クリーム） | ☀ 今日も晴れ |
-
-### 裏ネタ（Private → 右スマホへ）
-
-| 名前 | 色 | ラベル |
-|------|----|-------|
-| AngerPost | #8B0000（ダークレッド） | 💢 マジ無理 |
-| SkullPost | #2F2F2F（黒） | 💀 消えたい |
-| TrashPost | #4A4A4A（グレー） | 🗑 ゴミ |
+投稿ネタの種類・色・ラベル候補は `Assets/Resources/PublicPost.asset` / `PrivatePost.asset` で変更できます。
 
 ---
 
@@ -214,18 +215,12 @@ Unity 6000.3.9f1 で開いてください。
 
 - [ ] リリース用フォント（Noto Sans JP など商用可フォントへの差し替え）
   　現在はヒラギノフォント（macOS専用ライセンス）を使用
-- [ ] 投稿ネタのアイコン画像（各PostItemConfigSOのIconフィールドに設定）
-- [ ] 頭アイコン画像（SpawnPoint左下に表示）
 - [ ] BGM・SE の実装と音声ファイルの用意
 
 ### 機能
 
-- [ ] タイトル画面の実装（TitleViewは存在するが未接続）
 - [ ] スコアランキング・ハイスコア保存
-- [ ] 難易度設定・ステージ追加
 - [ ] ポーズ機能
-
-詳細は `Assets/1_Features/0_InGame/ASSET_TODO.md` を参照してください。
 
 ---
 

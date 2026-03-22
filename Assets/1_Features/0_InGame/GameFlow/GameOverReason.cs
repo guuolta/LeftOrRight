@@ -10,5 +10,11 @@ namespace InGame.GameFlow
 
         /// <summary>キャパシティオーバー: 吹き出しエリアが溢れた</summary>
         CapacityOver,
+
+        /// <summary>有効期限切れ: ポストが5秒以内に処理されなかった</summary>
+        TimeOver,
+
+        /// <summary>吹き出し外ドロップ: 吹き出しエリア外に投稿を落とした</summary>
+        OutsideDrop,
     }
 }
