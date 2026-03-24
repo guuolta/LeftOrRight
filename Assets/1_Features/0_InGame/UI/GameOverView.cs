@@ -81,10 +81,10 @@ namespace InGame.UI
                 };
             }
 
-            // 最終スコアの設定
+            // 最終スコアの設定（数字部分を150%サイズで表示）
             if (_finalScoreText is not null)
             {
-                _finalScoreText.text = $"{finalScore}いいね";
+                _finalScoreText.text = $"<b><size=150%>{finalScore}</size></b>いいね";
             }
 
             // フェードイン

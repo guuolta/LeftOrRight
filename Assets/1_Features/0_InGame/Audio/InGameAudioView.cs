@@ -14,7 +14,10 @@ namespace InGame.Audio
         [Header("SE用AudioSource")]
         [SerializeField] private AudioSource _seSource;
 
-        [Header("BGMクリップ")]
+        [Header("タイトルBGMクリップ")]
+        [SerializeField] private AudioClip _titleBgmClip;
+
+        [Header("インゲームBGMクリップ")]
         [SerializeField] private AudioClip _bgmClip;
 
         [Header("ボタンクリック時のSE")]
@@ -24,7 +27,22 @@ namespace InGame.Audio
         [SerializeField] private AudioClip _postSeClip;
 
         /// <summary>
-        /// BGMを再生する。すでに再生中の場合は最初から再生し直す。
+        /// タイトルBGMを再生する。
+        /// </summary>
+        public void PlayTitleBGM()
+        {
+            if (_bgmSource is null || _titleBgmClip is null)
+            {
+                return;
+            }
+
+            _bgmSource.clip = _titleBgmClip;
+            _bgmSource.loop = true;
+            _bgmSource.Play();
+        }
+
+        /// <summary>
+        /// インゲームBGMを再生する。すでに再生中の場合は最初から再生し直す。
         /// </summary>
         public void PlayBGM()
         {

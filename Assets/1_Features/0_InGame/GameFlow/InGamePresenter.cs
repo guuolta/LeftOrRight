@@ -8,6 +8,7 @@ using InGame.Input;
 using InGame.Spawner;
 using InGame.SortArea;
 using InGame.UI;
+using unityroom.Api;
 
 namespace InGame.GameFlow
 {
@@ -89,6 +90,9 @@ namespace InGame.GameFlow
         /// <param name="ct">キャンセルトークン</param>
         private async UniTask ShowTitleAndStartAsync(CancellationToken ct)
         {
+            // タイトルBGM再生
+            _audioView?.PlayTitleBGM();
+
             // タイトル画面が閉じられるまで待機
             var tcs = new UniTaskCompletionSource();
             _titleView.Initialize(() => tcs.TrySetResult());
@@ -96,6 +100,9 @@ namespace InGame.GameFlow
 
             // タイトルクリック時のSE
             _audioView?.PlayButtonSE();
+
+            // タイトルBGM停止
+            _audioView?.StopBGM();
 
             // カウントダウン表示
             await _countdownView.ShowAsync(ct);
@@ -115,6 +122,9 @@ namespace InGame.GameFlow
             _gameModel.StartGame();
             _scoreModel.Reset();
             _scoreView.UpdateScore(0);
+
+            // 入力を有効化
+            _inputHandler.EnableInput();
 
             // BGM再生開始
             _audioView?.PlayBGM();
@@ -149,6 +159,9 @@ namespace InGame.GameFlow
             // ゲームループを停止
             _gameLoopCts?.Cancel();
 
+            // 入力を即座に無効化（演出中の操作を防ぐ）
+            _inputHandler.DisableInput();
+
             // BGM停止
             _audioView?.StopBGM();
 
@@ -157,6 +170,9 @@ namespace InGame.GameFlow
             {
                 await _gameOverEffectView.PlayAsync(ct);
             }
+
+            // スコアをunityroomのスコアボード（ボード1）へ送信
+            UnityroomApiClient.Instance.SendScore(1, _scoreModel.ScoreProp.CurrentValue, ScoreboardWriteMode.HighScoreDesc);
 
             // ゲームオーバー画面を表示
             await _gameOverView.ShowAsync(reason, _scoreModel.ScoreProp.CurrentValue, ct);

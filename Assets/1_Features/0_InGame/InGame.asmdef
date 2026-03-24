@@ -9,7 +9,8 @@
         "DOTween.Modules",
         "VContainer",
         "Unity.InputSystem",
-        "ZString"
+        "ZString",
+        "unityroom"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
