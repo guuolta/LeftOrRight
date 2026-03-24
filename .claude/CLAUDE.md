@@ -1,6 +1,11 @@
-Unityの操作は、UniCLIを用いて行う。
-以下のリンクがUniCLIのリファレンスである。
-https://github.com/yucchiy/UniCli/blob/main/README.md
+# Unity 操作ルール（最重要）
+
+Unityのシーン・プレハブ・アセットへの操作は、**必ず UniCLI を使用する**。
+YAMLを直接編集してはならない。
+
+- UniCLI リファレンス: https://github.com/yucchiy/UniCli/blob/main/README.md
+- シーンへのGameObject追加・コンポーネント設定・参照配線はすべてUniCLIのコマンドで行う
+- `.unity` / `.prefab` ファイルを直接編集することは禁止
 
 # Typing2026 コーディング規約
 

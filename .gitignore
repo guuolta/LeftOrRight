@@ -97,3 +97,11 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Sweet Land GUI
+/[Aa]ssets/SweetLandGUI/
+/[Aa]ssets/SweetLandGUI.meta
+
+# Epic Toon FX
+/[Aa]ssets/Epic Toon FX/
+/[Aa]ssets/Epic Toon FX.meta
